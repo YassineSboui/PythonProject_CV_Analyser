@@ -1,0 +1,16 @@
+googletrans 
+datetime
+fastapi
+pymongo 
+uvicorn
+imaplib
+pymongo
+difflib
+PyPDF2
+typing
+email
+spacy
+io
+re 
+
+python -m uvicorn Parsing_Using_Spacy3API:app      
