@@ -99,7 +99,7 @@ def save_attachments(part,email_message):
         elif any(job['ref'] == subject for job in stageRef_list):
             collection_name = "stage_candidates"
             doc['wanted_stage'] = next(job['id'] for job in stageRef_list if job['ref'] == subject)
-            
+
         elif "stage" in subject.lower():
             collection_name = "stage_candidates"
            
@@ -315,9 +315,25 @@ def getCvData(cleared_text):
                 if ent.text not in entities[ent.label_]:
                     entities[ent.label_].append(ent.text)
 
-         
+    entities["Skills"]=remove_duplicates(entities["Skills"])
     entities["Years_of_Experience"]=calculate_total_experience(Years_of_Experience_Data)
     return(dict(entities))
+
+
+#--------------------------------------------------------------------------------------------------------------------------------------------
+
+
+def remove_duplicates(skills):
+    unique_skills = set()
+    processed_skills = []
+    
+    for skill in skills:
+        lowercase_skill = skill.lower()
+        if lowercase_skill not in unique_skills:
+            unique_skills.add(lowercase_skill)
+            processed_skills.append(skill)
+    
+    return processed_skills
 
 
 #--------------------------------------------------------------------------------------------------------------------------------------------
