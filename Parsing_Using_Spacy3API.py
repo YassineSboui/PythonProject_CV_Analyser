@@ -42,7 +42,10 @@ connection_string = "mongodb+srv://sarramz:23466957@cluster0.fnjtmtz.mongodb.net
 client = MongoClient(connection_string)
 # test the connection by accessing a collection from the database
 db = client["PFE"]
-id_list = [str(job['_id']) for job in db.jobs.find({}, {"_id": 1})]
+
+jobRef_list = [{'id': str(job['_id']), 'ref': job['ref']} for job in db.jobs.find({}, {'_id': 0, '_id': 1, 'ref': 1})]
+pfeRef_list = [{'id': str(pfe['_id']), 'ref': pfe['ref']} for pfe in db.pves.find({}, {'_id': 0, '_id': 1, 'ref': 1})]
+stageRef_list = [{'id': str(stage['_id']), 'ref': stage['ref']} for stage in db.stages.find({}, {'_id': 0, '_id': 1, 'ref': 1})]
 
 
 #--------------------------------------------------------------------------------------------------------------------------------------------
@@ -80,16 +83,31 @@ def save_attachments(part,email_message):
         # extract the text from the page and add it to the overall text string
         text = text+page.extract_text()
 
+
     collection_name = None
-    if "pfe" in subject.lower():
+    
+    if re.match(r"^.{4,5}$", subject):
+       
+        if any(job['ref'] == subject for job in jobRef_list):
+            collection_name = "candidates"
+            doc['wanted_job'] = next(job['id'] for job in jobRef_list if job['ref'] == subject)
+        
+        elif any(job['ref'] == subject for job in pfeRef_list):
+            collection_name = "pfe_candidates"
+            doc['wanted_pfe'] = next(job['id'] for job in pfeRef_list if job['ref'] == subject)
+        
+        elif any(job['ref'] == subject for job in stageRef_list):
+            collection_name = "stage_candidates"
+            doc['wanted_stage'] = next(job['id'] for job in stageRef_list if job['ref'] == subject)
+            
+        elif "stage" in subject.lower():
+            collection_name = "stage_candidates"
+           
+    elif "pfe" in subject.lower():
         collection_name = "pfe_candidates"
-    elif "stage" in subject.lower():
-        collection_name = "stage_candidates"
-    elif re.match(r"^[0-9a-f]{24}$", subject):
-        collection_name = "candidates"
-        if(subject in id_list):
-            doc['wanted_job']=subject
-      
+   
+
+
     if collection_name :
 
         cleared_text=getCleaned_text(text)
