@@ -88,18 +88,17 @@ def save_attachments(part,email_message):
     
     if re.match(r"^.{4,5}$", subject):
        
-        if any(job['ref'] == subject for job in jobRef_list):
+        if any(job['ref'].lower() == subject.lower() for job in jobRef_list):
             collection_name = "candidates"
-            doc['wanted_job'] = next(job['id'] for job in jobRef_list if job['ref'] == subject)
-        
-        elif any(job['ref'] == subject for job in pfeRef_list):
-            collection_name = "pfe_candidates"
-            doc['wanted_pfe'] = next(job['id'] for job in pfeRef_list if job['ref'] == subject)
-        
-        elif any(job['ref'] == subject for job in stageRef_list):
-            collection_name = "stage_candidates"
-            doc['wanted_stage'] = next(job['id'] for job in stageRef_list if job['ref'] == subject)
+            doc['wanted_job'] = next(job['id'] for job in jobRef_list if job['ref'].lower() == subject.lower())
 
+        elif any(job['ref'].lower() == subject.lower() for job in pfeRef_list):
+            collection_name = "pfe_candidates"
+            doc['wanted_pfe'] = next(job['id'] for job in pfeRef_list if job['ref'].lower() == subject.lower())
+
+        elif any(job['ref'].lower() == subject.lower() for job in stageRef_list):
+            collection_name = "stage_candidates"
+            doc['wanted_stage'] = next(job['id'] for job in stageRef_list if job['ref'].lower() == subject.lower())
         elif "stage" in subject.lower():
             collection_name = "stage_candidates"
            
