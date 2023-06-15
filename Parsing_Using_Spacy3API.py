@@ -43,15 +43,13 @@ client = MongoClient(connection_string)
 # test the connection by accessing a collection from the database
 db = client["PFE"]
 
-jobRef_list = [{'id': str(job['_id']), 'ref': job['ref']} for job in db.jobs.find({}, {'_id': 0, '_id': 1, 'ref': 1})]
-pfeRef_list = [{'id': str(pfe['_id']), 'ref': pfe['ref']} for pfe in db.pves.find({}, {'_id': 0, '_id': 1, 'ref': 1})]
-stageRef_list = [{'id': str(stage['_id']), 'ref': stage['ref']} for stage in db.stages.find({}, {'_id': 0, '_id': 1, 'ref': 1})]
+
 
 
 #--------------------------------------------------------------------------------------------------------------------------------------------
 
 
-def save_attachments(part,email_message):
+def save_attachments(part,email_message,jobRef_list,pfeRef_list,stageRef_list):
 
     subject = email_message["Subject"]
     phone_regex = r"\+216 ?\d{8}|\d{2}\s\d{3}\s\d{3}|\d{2}\s\d{2}\s\d{2}\s\d{2}|\d[\d ]{0,6}\d$"
@@ -179,6 +177,9 @@ async def test_connection(request: Request):
 @app.get("/CheckCvDataFromMail")
 async def check_email():
     try:
+        jobRef_list = [{'id': str(job['_id']), 'ref': job['ref']} for job in db.jobs.find({}, {'_id': 0, '_id': 1, 'ref': 1})]
+        pfeRef_list = [{'id': str(pfe['_id']), 'ref': pfe['ref']} for pfe in db.pves.find({}, {'_id': 0, '_id': 1, 'ref': 1})]
+        stageRef_list = [{'id': str(stage['_id']), 'ref': stage['ref']} for stage in db.stages.find({}, {'_id': 0, '_id': 1, 'ref': 1})]
         savedfiles=0
         # Connect to the email server
         mail = imaplib.IMAP4_SSL(imap_server)
@@ -205,7 +206,7 @@ async def check_email():
                     fileName = part.get_filename()
                     if bool(fileName):
                         has_attachment = True
-                        if (save_attachments(part,email_message))==False:
+                        if (save_attachments(part,email_message,jobRef_list,pfeRef_list,stageRef_list))==False:
                             mail.store(num, "-FLAGS", "\\Seen")
                         else:
                             savedfiles=savedfiles+1
@@ -223,6 +224,9 @@ async def check_email():
 @app.post("/CheckCvDataFromMail")
 async def check_email(request: Request):
     try:
+        jobRef_list = [{'id': str(job['_id']), 'ref': job['ref']} for job in db.jobs.find({}, {'_id': 0, '_id': 1, 'ref': 1})]
+        pfeRef_list = [{'id': str(pfe['_id']), 'ref': pfe['ref']} for pfe in db.pves.find({}, {'_id': 0, '_id': 1, 'ref': 1})]
+        stageRef_list = [{'id': str(stage['_id']), 'ref': stage['ref']} for stage in db.stages.find({}, {'_id': 0, '_id': 1, 'ref': 1})]
         # Extract username and password from request body
         data = await request.json()
         username1 = data.get('username')
@@ -254,7 +258,7 @@ async def check_email(request: Request):
                     fileName = part.get_filename()
                     if bool(fileName):
                         has_attachment = True
-                        if (save_attachments(part,email_message))==False:
+                        if (save_attachments(part,email_message,jobRef_list,pfeRef_list,stageRef_list))==False:
                             mail.store(num, "-FLAGS", "\\Seen")
                         else:
                             savedfiles=savedfiles+1
